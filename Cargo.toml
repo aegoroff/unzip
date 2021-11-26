@@ -1,0 +1,16 @@
+[package]
+name = "unzip"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+zip = "0.5.13"
+indicatif = "0.16"
+futures = "0.3"
+async-std = "1.10"
+
+[profile.release]
+panic = 'abort'
+lto = true
