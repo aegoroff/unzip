@@ -86,6 +86,7 @@ async fn async_main() {
             };
         }
     }
+    bar.set_position(archive.len() as u64);
     println!("Extracted {} bytes", total);
 }
 
