@@ -11,6 +11,7 @@ indicatif = "0.16"
 futures = "0.3"
 async-std = "1.10"
 human_bytes = { version = "0.3", features = ["fast"] }
+clap = "2"
 
 [profile.release]
 panic = 'abort'

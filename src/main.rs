@@ -1,5 +1,6 @@
 use async_std::path::PathBuf;
 use async_std::task;
+use clap::{crate_name, crate_version, App, AppSettings, Arg};
 use human_bytes::human_bytes;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::path::Path;
@@ -12,15 +13,16 @@ fn main() {
 }
 
 async fn async_main() {
-    let args: Vec<_> = std::env::args().collect();
-    if args.len() < 3 {
-        println!("Usage: {} <filename> <dirname>", args[0]);
-        return;
-    }
-    let fname = std::path::Path::new(&*args[1]);
+    let app = build_cli();
+    let matches = app.get_matches();
+
+    let zip = matches.value_of("zip").unwrap();
+    let extract = matches.value_of("extract").unwrap();
+
+    let fname = std::path::Path::new(zip);
 
     #[cfg(target_os = "windows")]
-    let dir = String::from(r"\\?\") + &*args[2];
+    let dir = String::from(r"\\?\") + extract;
     #[cfg(target_os = "windows")]
     let extract_to = std::path::Path::new(&dir);
 
@@ -105,4 +107,26 @@ fn make_result_path(directory: &Path, zip_path: &Path) -> PathBuf {
 #[inline]
 fn make_result_path(directory: &Path, zip_path: &Path) -> PathBuf {
     PathBuf::from(directory.join(zip_path))
+}
+
+fn build_cli() -> App<'static, 'static> {
+    return App::new(crate_name!())
+        .setting(AppSettings::ArgRequiredElseHelp)
+        .version(crate_version!())
+        .author("egoroff <egoroff@gmail.com>")
+        .about("Unzip tool")
+        .arg(
+            Arg::with_name("zip")
+                .help("Path to zip file")
+                .required(true)
+                .index(1),
+        )
+        .arg(
+            Arg::with_name("extract")
+                .long("extract")
+                .short("e")
+                .takes_value(true)
+                .help("Output directory path")
+                .required(true),
+        );
 }
