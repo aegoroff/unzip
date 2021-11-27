@@ -27,7 +27,7 @@ async fn async_main() {
     let extract_to = std::path::Path::new(&dir);
 
     #[cfg(not(target_os = "windows"))]
-    let extract_to = std::path::Path::new(zip);
+    let extract_to = std::path::Path::new(extract);
 
     let file = fs::File::open(&fname).unwrap();
 
