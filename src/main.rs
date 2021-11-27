@@ -1,6 +1,7 @@
 use indicatif::{ProgressBar, ProgressStyle};
 use std::{fs, io};
 use async_std::{task};
+use async_std::path::PathBuf;
 
 extern crate async_std;
 
@@ -40,16 +41,17 @@ async fn async_main() {
             None => continue,
         };
 
-        let raw = String::from(outpath.to_str().unwrap_or_default());
-        let converted = raw.replace('/', r"\");
-
-        let result_path = rname.join(converted);
+        let result_path = outpath
+            .to_str()
+            .unwrap_or_default()
+            .split('/')
+            .fold(PathBuf::from(&rname), |pb, s| pb.join(s));
 
         if (&*zip_file.name()).ends_with('/') {
             async_std::fs::create_dir_all(&result_path).await.unwrap();
         } else {
             if let Some(p) = result_path.parent() {
-                if !p.exists() {
+                if !p.exists().await {
                     let r = async_std::fs::create_dir_all(&p).await;
                     match r {
                         Ok(_) => {}
