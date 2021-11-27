@@ -1,7 +1,8 @@
-use indicatif::{ProgressBar, ProgressStyle};
-use std::{fs, io};
-use async_std::{task};
 use async_std::path::PathBuf;
+use async_std::task;
+use indicatif::{ProgressBar, ProgressStyle};
+use std::path::Path;
+use std::{fs, io};
 
 extern crate async_std;
 
@@ -16,9 +17,15 @@ async fn async_main() {
         return;
     }
     let fname = std::path::Path::new(&*args[1]);
-    let dir = String::from(r"\\?\") + &*args[2];
 
-    let rname = std::path::Path::new(&dir);
+    #[cfg(target_os = "windows")]
+    let dir = String::from(r"\\?\") + &*args[2];
+    #[cfg(target_os = "windows")]
+    let extract_to = std::path::Path::new(&dir);
+
+    #[cfg(not(target_os = "windows"))]
+    let extract_to = std::path::Path::new(&*args[2]);
+
     let file = fs::File::open(&fname).unwrap();
 
     let mut archive = zip::ZipArchive::new(file).unwrap();
@@ -41,11 +48,7 @@ async fn async_main() {
             None => continue,
         };
 
-        let result_path = outpath
-            .to_str()
-            .unwrap_or_default()
-            .split('/')
-            .fold(PathBuf::from(&rname), |pb, s| pb.join(s));
+        let result_path = make_result_path(extract_to, &outpath);
 
         if (&*zip_file.name()).ends_with('/') {
             async_std::fs::create_dir_all(&result_path).await.unwrap();
@@ -84,4 +87,20 @@ async fn async_main() {
         }
     }
     println!("Extracted {} bytes", total);
+}
+
+#[cfg(target_os = "windows")]
+#[inline]
+fn make_result_path(directory: &Path, zip_path: &Path) -> PathBuf {
+    zip_path
+        .to_str()
+        .unwrap_or_default()
+        .split('/')
+        .fold(PathBuf::from(directory), |pb, s| pb.join(s))
+}
+
+#[cfg(not(target_os = "windows"))]
+#[inline]
+fn make_result_path(directory: &Path, zip_path: &Path) -> PathBuf {
+    PathBuf::from(directory.join(zip_path))
 }
