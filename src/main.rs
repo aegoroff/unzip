@@ -1,5 +1,6 @@
 use async_std::path::PathBuf;
 use async_std::task;
+use human_bytes::human_bytes;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::path::Path;
 use std::{fs, io};
@@ -7,7 +8,7 @@ use std::{fs, io};
 extern crate async_std;
 
 fn main() {
-    task::block_on(async_main())
+    task::block_on(async_main());
 }
 
 async fn async_main() {
@@ -34,8 +35,8 @@ async fn async_main() {
 
     let bar = ProgressBar::new(archive.len() as u64);
     bar.set_style(ProgressStyle::default_bar()
-        .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} {percent}% ({per_sec}, {eta})")
-        .progress_chars("#>-"));
+        .template("{spinner:.green} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos}/{len} {percent}% ({per_sec}, {eta})\n  {wide_msg}")
+        .progress_chars("=>-"));
 
     for i in 0..archive.len() {
         if i & (256 - 1) == 0 {
@@ -53,16 +54,16 @@ async fn async_main() {
         if (&*zip_file.name()).ends_with('/') {
             async_std::fs::create_dir_all(&result_path).await.unwrap();
         } else {
-            if let Some(p) = result_path.parent() {
-                if !p.exists().await {
-                    let r = async_std::fs::create_dir_all(&p).await;
+            if let Some(parent) = result_path.parent() {
+                if !parent.exists().await {
+                    let r = async_std::fs::create_dir_all(&parent).await;
                     match r {
                         Ok(_) => {}
                         Err(e) => {
-                            eprintln!(
+                            println!(
                                 "Error: {} path to create: {}",
                                 e,
-                                p.to_str().unwrap_or_default()
+                                parent.to_str().unwrap_or_default()
                             );
                         }
                     }
@@ -77,7 +78,7 @@ async fn async_main() {
                     }
                 }
                 Err(e) => {
-                    eprintln!(
+                    println!(
                         "Error: {} extracting path: {}",
                         e,
                         outpath.to_str().unwrap_or_default()
@@ -87,7 +88,7 @@ async fn async_main() {
         }
     }
     bar.set_position(archive.len() as u64);
-    println!("Extracted {} bytes", total);
+    bar.finish_with_message(format!("Extracted: {}", human_bytes(total as f64)));
 }
 
 #[cfg(target_os = "windows")]
