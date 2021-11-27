@@ -54,21 +54,11 @@ async fn async_main() {
         let result_path = make_result_path(extract_to, &outpath);
 
         if (&*zip_file.name()).ends_with('/') {
-            async_std::fs::create_dir_all(&result_path).await.unwrap();
+            create_directory(&result_path).await;
         } else {
             if let Some(parent) = result_path.parent() {
                 if !parent.exists().await {
-                    let r = async_std::fs::create_dir_all(&parent).await;
-                    match r {
-                        Ok(_) => {}
-                        Err(e) => {
-                            println!(
-                                "Error: {} path to create: {}",
-                                e,
-                                parent.to_str().unwrap_or_default()
-                            );
-                        }
-                    }
+                    create_directory(parent).await
                 }
             }
             let outfile = fs::File::create(&result_path);
@@ -91,6 +81,19 @@ async fn async_main() {
     }
     bar.set_position(archive.len() as u64);
     bar.finish_with_message(format!("Extracted: {}", human_bytes(total as f64)));
+}
+
+async fn create_directory(path: &async_std::path::Path) {
+    match async_std::fs::create_dir_all(path).await {
+        Ok(_) => {}
+        Err(e) => {
+            println!(
+                "Error: {} path to create: {}",
+                e,
+                path.to_str().unwrap_or_default()
+            );
+        }
+    }
 }
 
 #[cfg(target_os = "windows")]
