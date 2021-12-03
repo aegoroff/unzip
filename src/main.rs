@@ -1,5 +1,4 @@
 use async_std::path::PathBuf;
-use async_std::task;
 use clap::{crate_name, crate_version, App, AppSettings, Arg};
 use human_bytes::human_bytes;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -8,11 +7,8 @@ use std::{fs, io};
 
 extern crate async_std;
 
-fn main() {
-    task::block_on(async_main());
-}
-
-async fn async_main() {
+#[async_std::main]
+async fn main() {
     let app = build_cli();
     let matches = app.get_matches();
 
