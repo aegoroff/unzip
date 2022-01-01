@@ -1,5 +1,4 @@
 use async_std::path::PathBuf;
-use async_std::task;
 use clap::{crate_name, crate_version, App, AppSettings, Arg};
 use human_bytes::human_bytes;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -8,11 +7,8 @@ use std::{fs, io};
 
 extern crate async_std;
 
-fn main() {
-    task::block_on(async_main());
-}
-
-async fn async_main() {
+#[async_std::main]
+async fn main() -> std::io::Result<()> {
     let app = build_cli();
     let matches = app.get_matches();
 
@@ -29,9 +25,9 @@ async fn async_main() {
     #[cfg(not(target_os = "windows"))]
     let extract_to = std::path::Path::new(extract);
 
-    let file = fs::File::open(&fname).unwrap();
+    let file = fs::File::open(&fname)?;
 
-    let mut archive = zip::ZipArchive::new(file).unwrap();
+    let mut archive = zip::ZipArchive::new(file)?;
 
     let mut total = 0u64;
 
@@ -45,7 +41,7 @@ async fn async_main() {
             bar.set_position(i as u64);
         }
 
-        let mut zip_file = archive.by_index(i).unwrap();
+        let mut zip_file = archive.by_index(i)?;
         let outpath = match zip_file.enclosed_name() {
             Some(path) => path.to_owned(),
             None => continue,
@@ -81,6 +77,7 @@ async fn async_main() {
     }
     bar.set_position(archive.len() as u64);
     bar.finish_with_message(format!("Extracted: {}", human_bytes(total as f64)));
+    Ok(())
 }
 
 async fn create_directory(path: &async_std::path::Path) {
