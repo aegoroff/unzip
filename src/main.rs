@@ -112,22 +112,22 @@ fn make_result_path(directory: &Path, zip_path: &Path) -> PathBuf {
     PathBuf::from(directory.join(zip_path))
 }
 
-fn build_cli() -> App<'static, 'static> {
+fn build_cli() -> App<'static> {
     return App::new(crate_name!())
         .setting(AppSettings::ArgRequiredElseHelp)
         .version(crate_version!())
         .author("egoroff <egoroff@gmail.com>")
         .about("Unzip tool")
         .arg(
-            Arg::with_name("zip")
+            Arg::new("zip")
                 .help("Path to zip file")
                 .required(true)
                 .index(1),
         )
         .arg(
-            Arg::with_name("extract")
+            Arg::new("extract")
                 .long("extract")
-                .short("e")
+                .short('e')
                 .takes_value(true)
                 .help("Output directory path")
                 .required(true),
