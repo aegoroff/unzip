@@ -37,6 +37,7 @@ async fn main() -> std::io::Result<()> {
         .progress_chars("=>-"));
 
     for i in 0..archive.len() {
+        // each 256 item
         if i & (256 - 1) == 0 {
             bar.set_position(i as u64);
         }
