@@ -15,4 +15,5 @@ clap = { version = "3", features = ["std", "color", "suggestions", "cargo"] }
 
 [profile.release]
 panic = 'abort'
-lto = true
+lto = 'fat'
+codegen-units = 1
