@@ -1,11 +1,14 @@
 use async_std::path::PathBuf;
-use clap::{crate_name, crate_version, App, AppSettings, Arg};
+use clap::{command, Command};
 use human_bytes::human_bytes;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::path::Path;
 use std::{fs, io};
 
 extern crate async_std;
+
+#[macro_use]
+extern crate clap;
 
 #[async_std::main]
 async fn main() -> std::io::Result<()> {
@@ -110,24 +113,17 @@ fn make_result_path(directory: &Path, zip_path: &Path) -> PathBuf {
     PathBuf::from(directory.join(zip_path))
 }
 
-fn build_cli() -> App<'static> {
-    return App::new(crate_name!())
-        .setting(AppSettings::ArgRequiredElseHelp)
+fn build_cli() -> Command<'static> {
+    return command!(crate_name!())
+        .arg_required_else_help(true)
         .version(crate_version!())
-        .author("egoroff <egoroff@gmail.com>")
-        .about("Unzip tool")
+        .author(crate_authors!("\n"))
+        .about(crate_description!())
+        .arg(arg!([zip]).help("Path to zip file").required(true).index(1))
         .arg(
-            Arg::new("zip")
-                .help("Path to zip file")
+            arg!(-e --extract <PATH>)
                 .required(true)
-                .index(1),
-        )
-        .arg(
-            Arg::new("extract")
-                .long("extract")
-                .short('e')
                 .takes_value(true)
-                .help("Output directory path")
-                .required(true),
+                .help("Output directory path"),
         );
 }

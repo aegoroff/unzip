@@ -1,6 +1,10 @@
 [package]
 name = "unzip"
 version = "0.1.0"
+description = "Unzip tool"
+authors = ["egoroff <egoroff@gmail.com>"]
+repository = "https://github.com/aegoroff/unzip"
+homepage = "https://github.com/aegoroff/unzip"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -11,7 +15,7 @@ indicatif = "0.16"
 futures = "0.3"
 async-std = {version = "1", features = ["attributes"]}
 human_bytes = { version = "0.3", features = ["fast"] }
-clap = { version = "3", features = ["std", "color", "suggestions", "cargo"] }
+clap = { version = "3.1", features = ["std", "color", "suggestions", "cargo"] }
 
 [profile.release]
 panic = 'abort'
